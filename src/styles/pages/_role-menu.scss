@@ -1,0 +1,18 @@
+// Top role-based pill navigation inside app shell header
+.role-menu {
+  &__item {
+    flex-shrink: 0;
+    border-radius: 9999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.75);
+    transition: background 0.15s ease, color 0.15s ease;
+
+    &--active {
+      background: #ffffff;
+      color: #1e3a5f;
+    }
+  }
+}

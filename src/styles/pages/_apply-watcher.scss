@@ -1,0 +1,33 @@
+// Apply-watcher page — mobile layout fixes
+.apply-watcher {
+  // prevent grid children from blowing past parent width
+  min-width: 0;
+  overflow-x: hidden;
+
+  // every direct grid/flex child also gets min-width reset
+  & > *,
+  &__form > * {
+    min-width: 0;
+  }
+
+  &__form {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+
+    // all form controls take the full available column width
+    input,
+    select,
+    textarea {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    // constrain the leaflet map preview so it never overflows
+    .leaflet-container {
+      width: 100% !important;
+      max-width: 100%;
+    }
+  }
+}

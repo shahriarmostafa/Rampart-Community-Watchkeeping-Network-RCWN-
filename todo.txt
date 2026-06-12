@@ -1,0 +1,8 @@
+Done:
+1. Validate forms with TanStack Form.
+2. Add sign up/sign in cross-links.
+3. Add Google sign-in.
+4. Block authenticated users from auth pages and anonymous users from user pages.
+5. Keep auth/user pages PWA-only and public pages website-only.
+6. Create modular TypeScript + Express + MongoDB + Mongoose backend in sibling folder.
+7. Add Supabase storage config and AGENTS.md structure notes.
