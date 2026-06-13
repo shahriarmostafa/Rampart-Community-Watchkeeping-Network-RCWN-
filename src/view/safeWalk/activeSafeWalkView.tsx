@@ -209,17 +209,21 @@ export function ActiveSafeWalkView() {
         )}
       </NoticeBanner>
 
-      {/* Location */}
+      {/* Location + block status */}
       {coordinates && (
         <AppCard className="py-2">
           <div className="flex items-center gap-2 text-xs text-slate-500">
-            <span className="h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
+            <span className="h-2 w-2 animate-pulse rounded-full bg-teal-500" />
             Live — {coordinates.latitude.toFixed(5)}, {coordinates.longitude.toFixed(5)}
-            {activeSession.blockCode && (
+            {activeSession.blockCodes?.length > 1 ? (
+              <span className="ml-auto font-semibold text-amber-600">
+                Block border zone · watchers from {activeSession.blockCodes.length} blocks active
+              </span>
+            ) : activeSession.blockCode ? (
               <span className="ml-auto font-semibold text-slate-700">
                 Block {activeSession.blockCode}
               </span>
-            )}
+            ) : null}
           </div>
         </AppCard>
       )}

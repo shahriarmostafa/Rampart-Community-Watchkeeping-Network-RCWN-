@@ -1,11 +1,12 @@
 "use client";
 
+import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { Crosshair, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AppHeader } from "@/components/layout/appHeader";
-import { detectGeoBlock, saveGeoBlock, type DetectGeoBlockPayload } from "@/features/geoBlocks/geoBlockService";
+import { detectGeoBlock, listGeoBlocks, saveGeoBlock, type DetectGeoBlockPayload } from "@/features/geoBlocks/geoBlockService";
 import type { GeoBlock, GeoBlockType } from "@/types/geoBlock";
 
 type LeafletLatLng = {
@@ -27,7 +28,13 @@ type LeafletMarker = {
 
 type LeafletRectangle = {
   addTo: (map: LeafletMap) => LeafletRectangle;
+  remove: () => void;
   setBounds: (bounds: [[number, number], [number, number]]) => LeafletRectangle;
+};
+
+type LeafletCircleMarker = {
+  addTo: (map: LeafletMap) => LeafletCircleMarker;
+  remove: () => void;
 };
 
 type LeafletTileLayer = {
@@ -37,12 +44,18 @@ type LeafletTileLayer = {
 type LeafletApi = {
   map: (element: HTMLElement, options?: { scrollWheelZoom?: boolean }) => LeafletMap;
   marker: (center: [number, number]) => LeafletMarker;
+  circleMarker: (
+    center: [number, number],
+    options?: { color?: string; fillColor?: string; fillOpacity?: number; radius?: number; weight?: number },
+  ) => LeafletCircleMarker;
   rectangle: (
     bounds: [[number, number], [number, number]],
     options?: { color?: string; fillColor?: string; fillOpacity?: number; weight?: number },
   ) => LeafletRectangle;
   tileLayer: (url: string, options: Record<string, string | number>) => LeafletTileLayer;
 };
+
+const blockColors = ["#2563eb", "#dc2626", "#7c3aed", "#d97706", "#059669", "#be123c", "#0891b2", "#4f46e5"];
 
 declare global {
   interface Window {
@@ -86,6 +99,27 @@ function getRectangleBounds(center: { lat: number; lng: number }, widthKm: numbe
     [center.lat - latDelta / 2, center.lng - lngDelta / 2],
     [center.lat + latDelta / 2, center.lng + lngDelta / 2],
   ] as [[number, number], [number, number]];
+}
+
+function colorForBlock(blockCode: string) {
+  const index = blockCode.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0) % blockColors.length;
+  return blockColors[index];
+}
+
+function formatConflict(block: GeoBlock) {
+  if (!block.overlapConflict) {
+    return null;
+  }
+
+  return `Overlaps ${block.overlapConflict.areaName} / ${block.overlapConflict.blockCode} by ${block.overlapConflict.overlapPercent}%.`;
+}
+
+function getAxiosMessage(error: unknown) {
+  if (axios.isAxiosError<{ message?: string }>(error)) {
+    return error.response?.data?.message || error.message;
+  }
+
+  return error instanceof Error ? error.message : "Unexpected error.";
 }
 
 function loadLeaflet() {
@@ -141,8 +175,11 @@ export function AddGeoBlockView() {
   const mapRef = useRef<LeafletMap | null>(null);
   const markerRef = useRef<LeafletMarker | null>(null);
   const rectangleRef = useRef<LeafletRectangle | null>(null);
+  const existingLayerRefs = useRef<Array<LeafletRectangle | LeafletCircleMarker>>([]);
   const [payload, setPayload] = useState(defaultPayload);
   const [detectedBlock, setDetectedBlock] = useState<GeoBlock | null>(null);
+  const [existingBlocks, setExistingBlocks] = useState<GeoBlock[]>([]);
+  const [isMapReady, setIsMapReady] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -192,6 +229,7 @@ export function AddGeoBlockView() {
         });
 
         mapRef.current = map;
+        setIsMapReady(true);
         window.setTimeout(() => map.invalidateSize(), 0);
       })
       .catch((error: unknown) => {
@@ -202,10 +240,49 @@ export function AddGeoBlockView() {
       isMounted = false;
       mapRef.current?.remove();
       mapRef.current = null;
+      setIsMapReady(false);
       markerRef.current = null;
       rectangleRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    window.setTimeout(() => {
+      void listGeoBlocks()
+        .then((blocks) => setExistingBlocks(blocks.filter((block) => block.isActive !== false)))
+        .catch((error: unknown) => setMessage(getAxiosMessage(error)));
+    }, 0);
+  }, []);
+
+  useEffect(() => {
+    if (!isMapReady || !mapRef.current || !window.L) {
+      return;
+    }
+
+    existingLayerRefs.current.forEach((layer) => layer.remove());
+    existingLayerRefs.current = [];
+
+    for (const block of existingBlocks) {
+      const color = colorForBlock(block.blockCode);
+      existingLayerRefs.current.push(
+        window.L.rectangle(block.area.bounds, {
+          color,
+          fillColor: color,
+          fillOpacity: 0.08,
+          weight: 2,
+        }).addTo(mapRef.current),
+      );
+      existingLayerRefs.current.push(
+        window.L.circleMarker([block.center.lat, block.center.lng], {
+          color,
+          fillColor: color,
+          fillOpacity: 0.85,
+          radius: 5,
+          weight: 2,
+        }).addTo(mapRef.current),
+      );
+    }
+  }, [existingBlocks, isMapReady]);
 
   useEffect(() => {
     markerRef.current?.setLatLng([payload.lat, payload.lng]);
@@ -245,10 +322,11 @@ export function AddGeoBlockView() {
 
   async function handleDetect() {
     try {
-      setDetectedBlock(await detectGeoBlock(payload));
-      setMessage("Block detected from selected coordinates.");
+      const block = await detectGeoBlock(payload);
+      setDetectedBlock(block);
+      setMessage(formatConflict(block) || "Block detected from selected coordinates. This area is clear to save.");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not detect block.");
+      setMessage(getAxiosMessage(error));
     }
   }
 
@@ -264,13 +342,19 @@ export function AddGeoBlockView() {
         },
       });
       setDetectedBlock(block);
+      setExistingBlocks((current) => {
+        const withoutSaved = current.filter((item) => item.blockCode !== block.blockCode);
+        return [block, ...withoutSaved];
+      });
       setMessage(`Saved block ${block.blockCode}.`);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not save block.");
+      setMessage(getAxiosMessage(error));
     } finally {
       setIsSaving(false);
     }
   }
+
+  const hasOverlapConflict = Boolean(detectedBlock?.hasOverlapConflict);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -289,7 +373,7 @@ export function AddGeoBlockView() {
               <Crosshair aria-hidden className="h-4 w-4" />
               Detect
             </Button>
-            <Button className="gap-2" disabled={isSaving} onClick={handleSave} type="button">
+            <Button className="gap-2" disabled={isSaving || hasOverlapConflict} onClick={handleSave} type="button">
               <Database aria-hidden className="h-4 w-4" />
               {isSaving ? "Saving..." : "Save block"}
             </Button>
@@ -305,7 +389,7 @@ export function AddGeoBlockView() {
               ref={mapContainerRef}
             />
             <p className="mt-3 text-xs text-slate-500">
-              Tap or click the map to move the marker. The rectangle shows the block area around the selected center.
+              Tap or click the map to move the marker. Existing blocks are shown as colored rectangles and center dots.
             </p>
           </div>
 
@@ -383,9 +467,14 @@ export function AddGeoBlockView() {
             </div>
 
             {detectedBlock ? (
-              <div className="rounded-lg border border-teal-200 bg-teal-50 p-4 shadow-sm">
-                <h2 className="text-lg font-bold text-teal-950">Generated block</h2>
-                <dl className="mt-3 grid gap-2 text-sm text-teal-900">
+              <div className={`rounded-lg border p-4 shadow-sm ${hasOverlapConflict ? "border-red-200 bg-red-50" : "border-teal-200 bg-teal-50"}`}>
+                <h2 className={`text-lg font-bold ${hasOverlapConflict ? "text-red-950" : "text-teal-950"}`}>Generated block</h2>
+                {hasOverlapConflict ? (
+                  <p className="mt-2 rounded-md bg-white p-2 text-sm font-semibold text-red-700">
+                    {formatConflict(detectedBlock)} Move or resize the block before saving.
+                  </p>
+                ) : null}
+                <dl className={`mt-3 grid gap-2 text-sm ${hasOverlapConflict ? "text-red-900" : "text-teal-900"}`}>
                   <div className="flex justify-between gap-4">
                     <dt className="font-bold">Block code</dt>
                     <dd>{detectedBlock.blockCode}</dd>

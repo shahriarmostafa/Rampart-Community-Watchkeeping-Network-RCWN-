@@ -18,6 +18,8 @@ export type SafeWalkSession = {
   startAddress?: string;
   destinationAddress?: string;
   blockCode?: string;
+  blockCodes: string[];
+  inOverlap?: boolean;
   location?: { lat: number; lng: number };
   shareWith: SafeWalkShareWith;
   startedAt: string;
@@ -31,6 +33,8 @@ export type SafeWalkSessionPublic = {
   status: SafeWalkStatus;
   riskLevel: RiskLevel;
   blockCode?: string;
+  blockCodes: string[];
+  inOverlap: boolean;
   startedAt: string;
   userName?: string;
   location?: { lat: number; lng: number };

@@ -37,6 +37,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     return onAuthStateChanged(auth, (nextUser) => {
+      setIsLoading(true);
+
       if (nextUser) {
         setUser(nextUser);
         void syncAuthenticatedUser(nextUser)
@@ -44,7 +46,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setAppUser(nextAppUser);
             setRole(nextAppUser.role);
           })
-          .catch(() => undefined)
+          .catch(() => {
+            setAppUser(null);
+            setRole("citizen");
+          })
           .finally(() => setIsLoading(false));
         return;
       }

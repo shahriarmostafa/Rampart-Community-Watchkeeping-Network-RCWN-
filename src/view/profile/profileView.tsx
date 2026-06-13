@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/features/auth/useAuth";
 import { listCircleMembers } from "@/features/circle/circleService";
-import { detectGeoBlock, listGeoBlocks } from "@/features/geoBlocks/geoBlockService";
+import { listGeoBlocks, resolveGeoBlockLocation } from "@/features/geoBlocks/geoBlockService";
 import { getUserProfile, updateUserProfile } from "@/features/users/userService";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import type { CircleMember } from "@/types/circle";
@@ -67,6 +67,8 @@ export function ProfileView() {
   const [message, setMessage] = useState<string | null>(null);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [profileBlockDetails, setProfileBlockDetails] = useState<GeoBlock | null>(null);
+  const [matchingBlocks, setMatchingBlocks] = useState<GeoBlock[]>([]);
+  const [selectedMatchBlockCode, setSelectedMatchBlockCode] = useState("");
   const [circleMembers, setCircleMembers] = useState<CircleMember[]>([]);
   const [circleMax, setCircleMax] = useState(15);
 
@@ -121,6 +123,8 @@ export function ProfileView() {
         lat: Number(coordinates.latitude.toFixed(6)),
         lng: Number(coordinates.longitude.toFixed(6)),
       });
+      setMatchingBlocks([]);
+      setSelectedMatchBlockCode("");
       setMessage("Location selected. Save profile to store your block.");
     }, 0);
   }, [coordinates]);
@@ -143,17 +147,12 @@ export function ProfileView() {
     }
 
     try {
-      const block = await detectGeoBlock({
+      const resolved = await resolveGeoBlockLocation({
         lat: location.lat,
         lng: location.lng,
-        areaName: address || "Current area",
-        precision: 6,
-        type: "urban",
-        area: { widthKm: 2, heightKm: 3 },
-        target: { watchers: 40, truthKeepers: 10, guardians: 2 },
       });
 
-      if (!block.isAvailable) {
+      if (resolved.status === "unavailable") {
         await Swal.fire({
           confirmButtonColor: "#0f766e",
           confirmButtonText: "Okay",
@@ -161,6 +160,22 @@ export function ProfileView() {
           text: "The app is not available in your area yet.",
           title: "Area not available",
         });
+        return;
+      }
+
+      if (resolved.status === "multiple_matches" && !selectedMatchBlockCode) {
+        setMatchingBlocks(resolved.blocks);
+        setMessage("This location is inside more than one RCWN block. Select the correct block, then save again.");
+        return;
+      }
+
+      const block =
+        resolved.status === "matched"
+          ? resolved.block
+          : resolved.blocks.find((item) => item.blockCode === selectedMatchBlockCode);
+
+      if (!block) {
+        setMessage("Please select one matching block before saving.");
         return;
       }
 
@@ -180,6 +195,8 @@ export function ProfileView() {
 
       setProfile(nextProfile);
       setProfileBlockDetails(block);
+      setMatchingBlocks([]);
+      setSelectedMatchBlockCode("");
       setIsEditingAddress(false);
       setMessage(`Profile saved in block ${block.blockCode}.`);
     } catch (error) {
@@ -264,16 +281,69 @@ export function ProfileView() {
             <div className="mt-3 grid grid-cols-2 gap-3">
               <label className="grid gap-2 text-sm font-bold text-slate-900">
                 Latitude
-                <Input onChange={(event) => setLocation((current) => ({ ...current, lat: Number(event.target.value) }))} type="number" value={location.lat} />
+                <Input
+                  onChange={(event) => {
+                    setMatchingBlocks([]);
+                    setSelectedMatchBlockCode("");
+                    setLocation((current) => ({ ...current, lat: Number(event.target.value) }));
+                  }}
+                  type="number"
+                  value={location.lat}
+                />
               </label>
               <label className="grid gap-2 text-sm font-bold text-slate-900">
                 Longitude
-                <Input onChange={(event) => setLocation((current) => ({ ...current, lng: Number(event.target.value) }))} type="number" value={location.lng} />
+                <Input
+                  onChange={(event) => {
+                    setMatchingBlocks([]);
+                    setSelectedMatchBlockCode("");
+                    setLocation((current) => ({ ...current, lng: Number(event.target.value) }));
+                  }}
+                  type="number"
+                  value={location.lng}
+                />
               </label>
             </div>
             <div className="mt-3">
-              <LeafletCoordinatePicker lat={location.lat} lng={location.lng} onChange={setLocation} />
+              <LeafletCoordinatePicker
+                lat={location.lat}
+                lng={location.lng}
+                onChange={(nextLocation) => {
+                  setMatchingBlocks([]);
+                  setSelectedMatchBlockCode("");
+                  setLocation(nextLocation);
+                }}
+              />
             </div>
+            {matchingBlocks.length ? (
+              <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                <label className="grid gap-2 text-sm font-bold text-amber-950">
+                  Select your block
+                  <select
+                    className="h-11 rounded-md border border-amber-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-teal-700 focus:ring-2 focus:ring-teal-100"
+                    onChange={(event) => setSelectedMatchBlockCode(event.target.value)}
+                    value={selectedMatchBlockCode}
+                  >
+                    <option value="">Choose matching block</option>
+                    {matchingBlocks.map((block) => (
+                      <option key={block.blockCode} value={block.blockCode}>
+                        {blockPlaceLabel(block)} / {block.blockCode}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="mt-3 grid gap-2">
+                  {matchingBlocks.map((block) => (
+                    <div className="rounded-md bg-white p-2 text-xs text-amber-950" key={block.blockCode}>
+                      <div className="font-bold">{blockPlaceLabel(block)} / {block.blockCode}</div>
+                      <div className="mt-1 text-amber-800">
+                        {(block.stats?.citizens ?? 0)} citizens / {(block.stats?.watchers ?? 0)} watchers
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             {locationError ? <p className="mt-3 text-xs font-semibold text-red-600">{locationError}</p> : null}
             {message ? <p className="mt-3 text-sm font-semibold text-slate-600">{message}</p> : null}
             <div className="mt-4 grid grid-cols-2 gap-3">

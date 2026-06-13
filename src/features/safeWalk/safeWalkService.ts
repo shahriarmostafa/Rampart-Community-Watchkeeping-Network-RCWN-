@@ -6,7 +6,6 @@ type StartPayload = {
   userName?: string;
   startAddress?: string;
   destinationAddress?: string;
-  blockCode?: string;
   location?: { lat: number; lng: number };
   shareWith: SafeWalkShareWith;
 };
@@ -19,11 +18,10 @@ export async function startSafeWalk(payload: StartPayload) {
 export async function updateSessionLocation(
   sessionId: string,
   location: { lat: number; lng: number },
-  blockCode?: string,
 ) {
   const response = await secureApi.patch<{ session: SafeWalkSession }>(
     `/safe-walk/${sessionId}/location`,
-    { ...location, blockCode },
+    location,
   );
   return response.data.session;
 }

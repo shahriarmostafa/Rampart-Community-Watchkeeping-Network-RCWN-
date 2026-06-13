@@ -74,11 +74,18 @@ function SessionCard({ session }: { session: SafeWalkSessionPublic }) {
 
       <div className="mt-3 text-sm text-slate-700">
         {isAnonymous ? (
-          <p className="text-sm text-slate-600">
-            {risk === "safe"
-              ? "Someone is safewalking in your block."
-              : "An anonymous user in your block needs a watch presence nearby."}
-          </p>
+          <div className="grid gap-1">
+            <p className="text-sm text-slate-600">
+              {risk === "safe"
+                ? "Someone is safewalking in your block."
+                : "An anonymous user in your block needs a watch presence nearby."}
+            </p>
+            {session.inOverlap && (
+              <p className="text-xs font-semibold text-amber-600">
+                Block border zone — visible to watchers in {session.blockCodes.join(" & ")}
+              </p>
+            )}
+          </div>
         ) : (
           <div className="grid gap-1 text-sm">
             {session.userName && (
@@ -89,9 +96,13 @@ function SessionCard({ session }: { session: SafeWalkSessionPublic }) {
                 <span className="font-semibold text-slate-950">{session.userName}</span>
               </div>
             )}
-            {session.blockCode && (
+            {session.inOverlap ? (
+              <p className="text-xs font-semibold text-amber-600">
+                Block border zone — {session.blockCodes.join(" & ")}
+              </p>
+            ) : session.blockCode ? (
               <p className="text-xs text-slate-500">Block: {session.blockCode}</p>
-            )}
+            ) : null}
           </div>
         )}
       </div>
@@ -107,7 +118,9 @@ function SessionCard({ session }: { session: SafeWalkSessionPublic }) {
           ) : isScared ? (
             <p className="font-semibold text-slate-600">
               <TriangleAlert aria-hidden className="mr-1 inline h-3 w-3 text-amber-600" />
-              Approximate area — Block {session.blockCode ?? "unknown"}
+              {session.inOverlap
+                ? `Block border zone — ${session.blockCodes.join(" & ")}`
+                : `Approximate area — Block ${session.blockCode ?? "unknown"}`}
             </p>
           ) : null}
           <p className="mt-2 text-slate-500">

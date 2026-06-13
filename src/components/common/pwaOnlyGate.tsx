@@ -3,13 +3,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Download, ShieldCheck } from "lucide-react";
+import { AuthLoader } from "@/components/common/authLoader";
 import { useDisplayMode } from "@/hooks/useDisplayMode";
 
 export function PwaOnlyGate({ children }: { children: ReactNode }) {
   const { isResolved, isStandalone } = useDisplayMode();
 
   if (!isResolved) {
-    return null;
+    return <AuthLoader message="Opening the app experience..." />;
   }
 
   if (isStandalone) {

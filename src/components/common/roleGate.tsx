@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ShieldAlert } from "lucide-react";
+import { AuthLoader } from "@/components/common/authLoader";
 import type { Role } from "@/config/roles";
 import { useAuth } from "@/features/auth/useAuth";
 
@@ -20,7 +21,11 @@ export function RoleGate({
   minimumRole: Role;
   children: ReactNode;
 }) {
-  const { role } = useAuth();
+  const { isLoading, role } = useAuth();
+
+  if (isLoading) {
+    return <AuthLoader message="Loading your role permissions..." />;
+  }
 
   if (roleRank[role] >= roleRank[minimumRole]) {
     return children;

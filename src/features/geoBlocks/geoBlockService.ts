@@ -1,5 +1,5 @@
 import { publicApi } from "@/lib/api/publicApi";
-import type { GeoBlock, GeoBlockType } from "@/types/geoBlock";
+import type { GeoBlock, GeoBlockType, ResolveGeoBlockLocationResult } from "@/types/geoBlock";
 
 export type DetectGeoBlockPayload = {
   lat: number;
@@ -36,4 +36,9 @@ export async function listGeoBlocks() {
 export async function saveGeoBlock(payload: DetectGeoBlockPayload & { blockCode?: string; center?: { lat: number; lng: number } }) {
   const response = await publicApi.post<{ block: GeoBlock }>("/geo-blocks", payload);
   return response.data.block;
+}
+
+export async function resolveGeoBlockLocation(payload: { lat: number; lng: number }) {
+  const response = await publicApi.post<ResolveGeoBlockLocationResult>("/geo-blocks/resolve-location", payload);
+  return response.data;
 }

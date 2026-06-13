@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { BadgeCheck, CheckCircle2, IdCard, ImagePlus, MapPinned, RefreshCcw, Send } from "lucide-react";
+import { BadgeCheck, CheckCircle2, IdCard, ImagePlus, LocateFixed, MapPinned, RefreshCcw, Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppCard } from "@/components/common/appCard";
 import { LeafletBlockPreview } from "@/components/common/leafletBlockPreview";
@@ -10,8 +10,9 @@ import { SectionLabel } from "@/components/common/sectionLabel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/features/auth/useAuth";
-import { listGeoBlocks } from "@/features/geoBlocks/geoBlockService";
+import { listGeoBlocks, resolveGeoBlockLocation } from "@/features/geoBlocks/geoBlockService";
 import { submitWatcherApplication } from "@/features/watcherApplications/watcherApplicationService";
+import { useGeolocation } from "@/hooks/useGeolocation";
 import type { GeoBlock } from "@/types/geoBlock";
 import { watcherApplicationSchema, type WatcherApplicationInput } from "@/validators/watcherApplication.schema";
 
@@ -32,10 +33,13 @@ function blockOptionLabel(block: GeoBlock) {
 
 export function ApplyWatcherView() {
   const { user } = useAuth();
+  const { coordinates, error: locationError, requestLocation } = useGeolocation();
   const [message, setMessage] = useState<string | null>(null);
   const [blocks, setBlocks] = useState<GeoBlock[]>([]);
   const [isLoadingBlocks, setIsLoadingBlocks] = useState(true);
+  const [isResolvingLocation, setIsResolvingLocation] = useState(false);
   const [selectedBlock, setSelectedBlock] = useState<GeoBlock | null>(null);
+  const [locationMatches, setLocationMatches] = useState<GeoBlock[]>([]);
   const form = useForm({
     defaultValues: {
       fullName: user?.displayName || "",
@@ -101,13 +105,57 @@ export function ApplyWatcherView() {
     }
   }
 
-  function selectBlock(blockCode: string) {
-    const block = blocks.find((item) => item.blockCode === blockCode) || null;
+  function applySelectedBlock(block: GeoBlock | null) {
     setSelectedBlock(block);
     form.setFieldValue("area", block?.areaName || "");
     form.setFieldValue("blockCode", block?.blockCode || "");
     form.setFieldValue("blockAreaName", block?.areaName || "");
     form.setFieldValue("blockCenter", block?.center);
+  }
+
+  function selectBlock(blockCode: string) {
+    applySelectedBlock(blocks.find((item) => item.blockCode === blockCode) || null);
+  }
+
+  function selectLocationBlock(block: GeoBlock) {
+    setBlocks((current) => (current.some((item) => item.blockCode === block.blockCode) ? current : [block, ...current]));
+    applySelectedBlock(block);
+  }
+
+  async function useCurrentLocationForBlock() {
+    if (!coordinates) {
+      requestLocation();
+      setMessage("Allow location access, then tap this again to find your block.");
+      return;
+    }
+
+    setIsResolvingLocation(true);
+    try {
+      const resolved = await resolveGeoBlockLocation({
+        lat: coordinates.latitude,
+        lng: coordinates.longitude,
+      });
+
+      if (resolved.status === "unavailable") {
+        setLocationMatches([]);
+        setMessage("The app is not available in your area yet. You can still choose another available block manually.");
+        return;
+      }
+
+      if (resolved.status === "matched") {
+        setLocationMatches([]);
+        selectLocationBlock(resolved.block);
+        setMessage(`Selected ${blockPlaceLabel(resolved.block) || resolved.block.blockCode} from your current location.`);
+        return;
+      }
+
+      setLocationMatches(resolved.blocks);
+      setMessage("Your current location is inside more than one RCWN block. Choose the block where you want to apply.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not resolve your current location.");
+    } finally {
+      setIsResolvingLocation(false);
+    }
   }
 
   useEffect(() => {
@@ -217,6 +265,35 @@ export function ApplyWatcherView() {
               ))}
             </select>
           </label>
+          <Button
+            className="mt-3 w-full gap-2"
+            disabled={isResolvingLocation}
+            onClick={useCurrentLocationForBlock}
+            type="button"
+            variant="secondary"
+          >
+            <LocateFixed aria-hidden className="h-4 w-4" />
+            {isResolvingLocation ? "Finding block..." : "Use my current location"}
+          </Button>
+          {locationError ? <p className="mt-2 text-xs font-semibold text-red-600">{locationError}</p> : null}
+          {locationMatches.length ? (
+            <div className="mt-3 grid gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+              <p className="text-xs font-bold text-amber-950">Matching blocks from your location</p>
+              {locationMatches.map((block) => (
+                <button
+                  className="rounded-md bg-white p-3 text-left text-xs text-amber-950 shadow-sm transition hover:border-teal-300"
+                  key={block.blockCode}
+                  onClick={() => selectLocationBlock(block)}
+                  type="button"
+                >
+                  <span className="block font-bold">{blockPlaceLabel(block) || block.areaName}</span>
+                  <span className="mt-1 block text-amber-800">
+                    {block.blockCode} / {(block.stats?.citizens ?? 0)} citizens / {(block.stats?.watchers ?? 0)} watchers
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : null}
           {selectedBlock ? (
             <div className="mt-3 rounded-lg border border-teal-200 bg-teal-50 p-3">
               <div className="flex items-center gap-2 text-sm font-bold text-teal-800">

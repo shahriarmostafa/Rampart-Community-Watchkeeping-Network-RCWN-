@@ -33,4 +33,27 @@ export type GeoBlock = {
   };
   isActive?: boolean;
   isAvailable?: boolean;
+  hasOverlapConflict?: boolean;
+  overlapConflict?: GeoBlockOverlapConflict | null;
 };
+
+export type GeoBlockOverlapConflict = {
+  blockCode: string;
+  areaName: string;
+  overlapPercent: number;
+};
+
+export type ResolveGeoBlockLocationResult =
+  | {
+      status: "matched";
+      block: GeoBlock;
+      blocks: GeoBlock[];
+    }
+  | {
+      status: "multiple_matches";
+      blocks: GeoBlock[];
+    }
+  | {
+      status: "unavailable";
+      blocks: [];
+    };

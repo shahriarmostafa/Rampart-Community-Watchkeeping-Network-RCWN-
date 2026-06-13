@@ -3,13 +3,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Monitor, Smartphone } from "lucide-react";
+import { AuthLoader } from "@/components/common/authLoader";
 import { useDisplayMode } from "@/hooks/useDisplayMode";
 
 export function WebsiteOnlyGate({ children }: { children: ReactNode }) {
   const { isResolved, isStandalone } = useDisplayMode();
 
   if (!isResolved) {
-    return null;
+    return <AuthLoader message="Checking where RCWN should open..." />;
   }
 
   if (!isStandalone) {
