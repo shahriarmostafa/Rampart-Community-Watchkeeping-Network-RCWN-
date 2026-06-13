@@ -16,47 +16,8 @@ import {
 } from "@/features/geoBlocks/geoBlockService";
 import type { GeoBlock, GeoBlockType } from "@/types/geoBlock";
 
-type LeafletLatLng = { lat: number; lng: number };
-type LeafletMap = {
-  invalidateSize: () => void;
-  on: (event: "click", handler: (event: { latlng: LeafletLatLng }) => void) => LeafletMap;
-  remove: () => void;
-  setView: (center: [number, number], zoom: number) => LeafletMap;
-};
-type LeafletMarker = {
-  addTo: (map: LeafletMap) => LeafletMarker;
-  remove: () => void;
-  setLatLng: (center: [number, number]) => LeafletMarker;
-};
-type LeafletRectangle = {
-  addTo: (map: LeafletMap) => LeafletRectangle;
-  remove: () => void;
-  setBounds: (bounds: [[number, number], [number, number]]) => LeafletRectangle;
-};
-type LeafletCircleMarker = {
-  addTo: (map: LeafletMap) => LeafletCircleMarker;
-  remove: () => void;
-};
-type LeafletApi = {
-  map: (element: HTMLElement, options?: { scrollWheelZoom?: boolean }) => LeafletMap;
-  marker: (center: [number, number]) => LeafletMarker;
-  circleMarker: (
-    center: [number, number],
-    options?: { color?: string; fillColor?: string; fillOpacity?: number; radius?: number; weight?: number },
-  ) => LeafletCircleMarker;
-  rectangle: (
-    bounds: [[number, number], [number, number]],
-    options?: { color?: string; fillColor?: string; fillOpacity?: number; weight?: number },
-  ) => LeafletRectangle;
-  tileLayer: (url: string, options: Record<string, string | number>) => { addTo: (map: LeafletMap) => unknown };
-};
-
-declare global {
-  interface Window {
-    L?: LeafletApi;
-    rcwnLeafletPromise?: Promise<LeafletApi>;
-  }
-}
+import { loadLeaflet } from "@/lib/leaflet/loader";
+import type { LeafletCircleMarker, LeafletMap, LeafletMarker, LeafletRectangle } from "@/lib/leaflet/loader";
 
 const blockColors = ["#2563eb", "#dc2626", "#7c3aed", "#d97706", "#059669", "#be123c", "#0891b2", "#4f46e5"];
 
@@ -155,34 +116,6 @@ function blockToPayload(block: GeoBlock): DetectGeoBlockPayload {
   };
 }
 
-function loadLeaflet() {
-  if (window.L) return Promise.resolve(window.L);
-  if (window.rcwnLeafletPromise) return window.rcwnLeafletPromise;
-
-  window.rcwnLeafletPromise = new Promise<LeafletApi>((resolve, reject) => {
-    if (!document.querySelector('link[href="https://unpkg.com/leaflet/dist/leaflet.css"]')) {
-      const link = document.createElement("link");
-      link.href = "https://unpkg.com/leaflet/dist/leaflet.css";
-      link.rel = "stylesheet";
-      document.head.appendChild(link);
-    }
-
-    const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://unpkg.com/leaflet/dist/leaflet.js"]');
-    if (existingScript) {
-      existingScript.addEventListener("load", () => window.L && resolve(window.L));
-      existingScript.addEventListener("error", () => reject(new Error("Could not load Leaflet.")));
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/leaflet/dist/leaflet.js";
-    script.onload = () => (window.L ? resolve(window.L) : reject(new Error("Leaflet did not initialize.")));
-    script.onerror = () => reject(new Error("Could not load Leaflet."));
-    document.body.appendChild(script);
-  });
-
-  return window.rcwnLeafletPromise;
-}
 
 async function reverseGeocode(lat: number, lng: number) {
   const params = new URLSearchParams({

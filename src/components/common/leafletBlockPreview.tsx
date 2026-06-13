@@ -1,88 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { loadLeaflet } from "@/lib/leaflet/loader";
+import type { LeafletMap, LeafletRectangle } from "@/lib/leaflet/loader";
 import type { GeoBlock } from "@/types/geoBlock";
-
-type LeafletMap = {
-  fitBounds: (bounds: [[number, number], [number, number]], options?: { padding?: [number, number] }) => LeafletMap;
-  invalidateSize: () => void;
-  remove: () => void;
-};
-
-type LeafletRectangle = {
-  addTo: (map: LeafletMap) => LeafletRectangle;
-  setBounds: (bounds: [[number, number], [number, number]]) => LeafletRectangle;
-};
-
-type LeafletTileLayer = {
-  addTo: (map: LeafletMap) => LeafletTileLayer;
-};
-
-type LeafletApi = {
-  map: (element: HTMLElement, options?: { scrollWheelZoom?: boolean; dragging?: boolean }) => LeafletMap;
-  rectangle: (
-    bounds: [[number, number], [number, number]],
-    options?: { color?: string; fillColor?: string; fillOpacity?: number; weight?: number },
-  ) => LeafletRectangle;
-  tileLayer: (url: string, options: Record<string, string | number>) => LeafletTileLayer;
-};
-
-function getWindowLeaflet() {
-  return window as Window & {
-    L?: LeafletApi;
-    rcwnLeafletPromise?: Promise<LeafletApi>;
-  };
-}
-
-function loadLeaflet() {
-  const leafletWindow = getWindowLeaflet();
-
-  if (leafletWindow.L) {
-    return Promise.resolve(leafletWindow.L);
-  }
-
-  if (leafletWindow.rcwnLeafletPromise) {
-    return leafletWindow.rcwnLeafletPromise;
-  }
-
-  leafletWindow.rcwnLeafletPromise = new Promise<LeafletApi>((resolve, reject) => {
-    if (!document.querySelector('link[href="https://unpkg.com/leaflet/dist/leaflet.css"]')) {
-      const link = document.createElement("link");
-      link.href = "https://unpkg.com/leaflet/dist/leaflet.css";
-      link.rel = "stylesheet";
-      document.head.appendChild(link);
-    }
-
-    const existingScript = document.querySelector<HTMLScriptElement>(
-      'script[src="https://unpkg.com/leaflet/dist/leaflet.js"]',
-    );
-
-    if (existingScript) {
-      existingScript.addEventListener("load", () => {
-        if (leafletWindow.L) {
-          resolve(leafletWindow.L);
-        }
-      });
-      existingScript.addEventListener("error", () => reject(new Error("Could not load Leaflet.")));
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/leaflet/dist/leaflet.js";
-    script.onload = () => {
-      if (leafletWindow.L) {
-        resolve(leafletWindow.L);
-        return;
-      }
-
-      reject(new Error("Leaflet did not initialize."));
-    };
-    script.onerror = () => reject(new Error("Could not load Leaflet."));
-    document.body.appendChild(script);
-  });
-
-  return leafletWindow.rcwnLeafletPromise;
-}
 
 export function LeafletBlockPreview({ block }: { block: GeoBlock }) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -95,9 +16,7 @@ export function LeafletBlockPreview({ block }: { block: GeoBlock }) {
 
     void loadLeaflet()
       .then((leaflet) => {
-        if (!isMounted || !mapContainerRef.current || mapRef.current) {
-          return;
-        }
+        if (!isMounted || !mapContainerRef.current || mapRef.current) return;
 
         const map = leaflet.map(mapContainerRef.current, { dragging: false, scrollWheelZoom: false });
         leaflet

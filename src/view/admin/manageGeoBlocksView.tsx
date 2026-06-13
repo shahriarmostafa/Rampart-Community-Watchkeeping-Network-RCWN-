@@ -6,38 +6,10 @@ import { useEffect, useRef, useState } from "react";
 import { Edit3, MapPinned, Plus, RefreshCcw } from "lucide-react";
 import { AppHeader } from "@/components/layout/appHeader";
 import { Button } from "@/components/ui/button";
+import { loadLeaflet } from "@/lib/leaflet/loader";
+import type { LeafletMap, LeafletMarker, LeafletRectangle } from "@/lib/leaflet/loader";
 import { listGeoBlocks } from "@/features/geoBlocks/geoBlockService";
 import type { GeoBlock } from "@/types/geoBlock";
-
-type LeafletMap = {
-  fitBounds: (bounds: [[number, number], [number, number]], options?: { padding?: [number, number] }) => LeafletMap;
-  invalidateSize: () => void;
-  remove: () => void;
-};
-type LeafletLayer = {
-  addTo: (map: LeafletMap) => LeafletLayer;
-  bindTooltip?: (content: string) => LeafletLayer;
-  on?: (event: "click", handler: () => void) => LeafletLayer;
-  remove: () => void;
-};
-type LeafletApi = {
-  divIcon: (options: { className?: string; html: string; iconAnchor?: [number, number]; iconSize?: [number, number] }) => unknown;
-  featureGroup: (layers: LeafletLayer[]) => { getBounds: () => [[number, number], [number, number]] };
-  map: (element: HTMLElement, options?: { scrollWheelZoom?: boolean }) => LeafletMap;
-  marker: (center: [number, number], options?: { icon?: unknown }) => LeafletLayer;
-  rectangle: (
-    bounds: [[number, number], [number, number]],
-    options?: { color?: string; fillColor?: string; fillOpacity?: number; weight?: number },
-  ) => LeafletLayer;
-  tileLayer: (url: string, options: Record<string, string | number>) => { addTo: (map: LeafletMap) => unknown };
-};
-
-declare global {
-  interface Window {
-    L?: LeafletApi;
-    rcwnLeafletPromise?: Promise<LeafletApi>;
-  }
-}
 
 const blockColors = ["#2563eb", "#dc2626", "#7c3aed", "#d97706", "#059669", "#be123c", "#0891b2", "#4f46e5"];
 
@@ -55,40 +27,12 @@ function topCenter(bounds: [[number, number], [number, number]]) {
   return [Math.max(south, north), (west + east) / 2] as [number, number];
 }
 
-function loadLeaflet() {
-  if (window.L) return Promise.resolve(window.L);
-  if (window.rcwnLeafletPromise) return window.rcwnLeafletPromise;
-
-  window.rcwnLeafletPromise = new Promise<LeafletApi>((resolve, reject) => {
-    if (!document.querySelector('link[href="https://unpkg.com/leaflet/dist/leaflet.css"]')) {
-      const link = document.createElement("link");
-      link.href = "https://unpkg.com/leaflet/dist/leaflet.css";
-      link.rel = "stylesheet";
-      document.head.appendChild(link);
-    }
-
-    const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://unpkg.com/leaflet/dist/leaflet.js"]');
-    if (existingScript) {
-      existingScript.addEventListener("load", () => window.L && resolve(window.L));
-      existingScript.addEventListener("error", () => reject(new Error("Could not load Leaflet.")));
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/leaflet/dist/leaflet.js";
-    script.onload = () => (window.L ? resolve(window.L) : reject(new Error("Leaflet did not initialize.")));
-    script.onerror = () => reject(new Error("Could not load Leaflet."));
-    document.body.appendChild(script);
-  });
-
-  return window.rcwnLeafletPromise;
-}
 
 export function ManageGeoBlocksView() {
   const router = useRouter();
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
-  const layerRefs = useRef<LeafletLayer[]>([]);
+  const layerRefs = useRef<(LeafletRectangle | LeafletMarker)[]>([]);
   const [blocks, setBlocks] = useState<GeoBlock[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);

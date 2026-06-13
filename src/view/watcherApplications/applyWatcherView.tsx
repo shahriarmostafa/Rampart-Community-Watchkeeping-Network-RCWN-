@@ -53,18 +53,18 @@ export function ApplyWatcherView() {
   const form = useForm({
     defaultValues: {
       fullName: user?.displayName || "",
-      gender: "prefer_not_to_say",
+      gender: "prefer_not_to_say" as WatcherApplicationInput["gender"],
       phone: "",
       area: "",
       address: "",
       blockCode: "",
       blockAreaName: "",
-      blockCenter: undefined,
+      blockCenter: undefined as WatcherApplicationInput["blockCenter"],
       availability: "",
       reason: "",
       experience: "",
-      userPhoto: null,
-      idCardPhoto: null,
+      userPhoto: null as File | null,
+      idCardPhoto: null as File | null,
     } satisfies WatcherApplicationInput,
     onSubmit: async ({ value }) => {
       const parsed = watcherApplicationSchema.safeParse(value);
