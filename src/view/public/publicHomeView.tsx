@@ -1,3 +1,5 @@
+﻿"use client";
+
 import Link from "next/link";
 import { FileCheck2, HeartHandshake, LockKeyhole, MapPinned, RadioTower, ShieldCheck, Siren, UsersRound } from "lucide-react";
 import { AppHeader } from "@/components/layout/appHeader";
@@ -123,3 +125,4 @@ export function PublicHomeView() {
     </main>
   );
 }
+

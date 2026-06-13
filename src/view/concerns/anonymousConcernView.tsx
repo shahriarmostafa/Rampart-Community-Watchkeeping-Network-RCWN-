@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { CloudUpload, Info, MessageCircle, ShieldQuestion } from "lucide-react";
 import { AppCard } from "@/components/common/appCard";
 import { NoticeBanner } from "@/components/common/noticeBanner";
@@ -40,3 +42,4 @@ export function AnonymousConcernView() {
     </div>
   );
 }
+

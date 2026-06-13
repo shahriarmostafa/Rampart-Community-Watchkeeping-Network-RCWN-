@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { ShieldCheck } from "lucide-react";
 import { AppCard } from "@/components/common/appCard";
 import { RouteHeader } from "@/components/common/routeHeader";
@@ -18,3 +20,4 @@ export function GuardianDashboardView() {
     </div>
   );
 }
+

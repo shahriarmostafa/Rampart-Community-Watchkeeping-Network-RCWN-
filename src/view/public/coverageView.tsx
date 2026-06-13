@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { BatteryLow, Map, RadioTower, Siren, Smartphone, TimerReset } from "lucide-react";
 import { AppHeader } from "@/components/layout/appHeader";
 import { PageSection } from "@/components/common/pageSection";
@@ -29,3 +31,4 @@ export function CoverageView() {
     </main>
   );
 }
+

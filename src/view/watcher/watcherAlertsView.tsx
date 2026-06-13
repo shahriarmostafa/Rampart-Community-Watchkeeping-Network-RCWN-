@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { Info, RadioTower, ShieldAlert, Venus } from "lucide-react";
 import { AppCard } from "@/components/common/appCard";
 import { AppChip } from "@/components/common/appChip";
@@ -59,3 +61,4 @@ export function WatcherAlertsView() {
     </div>
   );
 }
+

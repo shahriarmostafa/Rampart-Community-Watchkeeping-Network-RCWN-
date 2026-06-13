@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { Award, Heart, House, ShieldAlert, TriangleAlert } from "lucide-react";
 import { AppCard } from "@/components/common/appCard";
 import { AppChip } from "@/components/common/appChip";
@@ -53,3 +55,4 @@ export function VerificationTaskView() {
     </div>
   );
 }
+

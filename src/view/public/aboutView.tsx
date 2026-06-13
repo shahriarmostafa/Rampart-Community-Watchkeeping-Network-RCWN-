@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { Eye, FileWarning, HeartHandshake, LockKeyhole, MapPinned, ShieldCheck } from "lucide-react";
 import { AppHeader } from "@/components/layout/appHeader";
 import { PageSection } from "@/components/common/pageSection";
@@ -159,3 +161,4 @@ export function AboutView() {
     </main>
   );
 }
+

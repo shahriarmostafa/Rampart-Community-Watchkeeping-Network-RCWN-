@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { CheckCircle2, HeartHandshake, ShieldCheck, UsersRound } from "lucide-react";
 import { AppHeader } from "@/components/layout/appHeader";
 import { PageSection } from "@/components/common/pageSection";
@@ -16,7 +18,7 @@ export function MissionView() {
       <AppHeader />
       <PageSection className="py-14">
         <p className="text-sm font-bold uppercase tracking-wide text-teal-700">Mission</p>
-        <h1 className="mt-4 max-w-4xl text-4xl font-bold text-slate-950 md:text-5xl">Close the gap between “I am in danger” and “someone is helping.”</h1>
+        <h1 className="mt-4 max-w-4xl text-4xl font-bold text-slate-950 md:text-5xl">Close the gap between â€œI am in dangerâ€ and â€œsomeone is helping.â€</h1>
         <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600">
           RCWN exists because many people never report harassment, stalking, domestic violence, assault risk, or unsafe travel situations. The platform creates private, structured, abuse-resistant pathways for help before harm escalates.
         </p>
@@ -27,3 +29,4 @@ export function MissionView() {
     </main>
   );
 }
+

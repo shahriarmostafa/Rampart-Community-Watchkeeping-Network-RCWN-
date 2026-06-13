@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { DatabaseZap, EyeOff, FileLock2, ListChecks, LockKeyhole, ShieldAlert } from "lucide-react";
 import { AppHeader } from "@/components/layout/appHeader";
 import { PageSection } from "@/components/common/pageSection";
@@ -29,3 +31,4 @@ export function PrivacyView() {
     </main>
   );
 }
+

@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { ShieldCheck } from "lucide-react";
 import { AppCard } from "@/components/common/appCard";
 import { AppChip } from "@/components/common/appChip";
@@ -37,3 +39,4 @@ export function ConcernStatusView() {
     </div>
   );
 }
+

@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { AppHeader } from "@/components/layout/appHeader";
 import { PageSection } from "@/components/common/pageSection";
 
@@ -20,3 +22,4 @@ export function SafetyView() {
     </div>
   );
 }
+

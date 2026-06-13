@@ -1,3 +1,5 @@
+﻿"use client";
+
 type FeaturePageViewProps = {
   title: string;
   description?: string;
@@ -12,3 +14,4 @@ export function FeaturePageView({ title, description }: FeaturePageViewProps) {
     </div>
   );
 }
+

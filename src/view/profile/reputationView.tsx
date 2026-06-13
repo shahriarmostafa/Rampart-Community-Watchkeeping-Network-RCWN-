@@ -1,3 +1,5 @@
+﻿"use client";
+
 import type { LucideIcon } from "lucide-react";
 import { Award, ShieldCheck, Star, ThumbsUp } from "lucide-react";
 import { AppCard } from "@/components/common/appCard";
@@ -52,3 +54,4 @@ export function ReputationView() {
     </div>
   );
 }
+

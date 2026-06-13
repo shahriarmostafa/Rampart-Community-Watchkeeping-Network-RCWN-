@@ -1,3 +1,5 @@
+﻿"use client";
+
 import Link from "next/link";
 import { ClipboardCheck, MapPinned, ShieldCheck, UsersRound } from "lucide-react";
 import { AppHeader } from "@/components/layout/appHeader";
@@ -68,3 +70,4 @@ export function AdminDashboardView() {
     </div>
   );
 }
+

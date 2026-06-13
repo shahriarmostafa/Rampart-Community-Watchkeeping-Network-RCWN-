@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { Banknote, Building2, Compass, HeartPulse, Home, LifeBuoy, Phone, ShieldCheck } from "lucide-react";
 import { NoticeBanner } from "@/components/common/noticeBanner";
 import { RouteHeader } from "@/components/common/routeHeader";
@@ -28,3 +30,4 @@ export function SupportView() {
     </div>
   );
 }
+

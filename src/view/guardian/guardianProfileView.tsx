@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { Award, Building, ClipboardCheck, ShieldCheck, Star, Users } from "lucide-react";
 import { AppCard } from "@/components/common/appCard";
 import { AppChip } from "@/components/common/appChip";
@@ -51,3 +53,4 @@ export function GuardianProfileView() {
     </div>
   );
 }
+
