@@ -58,7 +58,7 @@ export function WatcherApplicationsAdminView() {
             <p className="text-xs font-bold uppercase tracking-wide text-teal-700">Admin review</p>
             <h1 className="mt-2 text-3xl font-bold text-slate-950">Watcher applications</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-              Approving an application promotes the backend user role from citizen to watcher.
+              Approving an application promotes the user to watcher and assigns the selected block as their duty area.
             </p>
           </div>
           <Button className="gap-2" onClick={loadApplications} type="button" variant="secondary">

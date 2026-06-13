@@ -372,7 +372,7 @@ export function ProfileView() {
       setLocation(block.center);
       setIsChangingOfficialArea(false);
       setShowOfficialArea(true);
-      setMessage(`Your official area is now ${blockPlaceLabel(block)} / ${block.blockCode}.`);
+      setMessage(`Your duty area is now ${blockPlaceLabel(block)} / ${block.blockCode}.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not change your official area.");
     }
@@ -380,7 +380,7 @@ export function ProfileView() {
 
   return (
     <div className="grid gap-4">
-      <RouteHeader title="My Profile" subtitle="Account, address, location, and block." />
+      <RouteHeader title="My Profile" subtitle="Account, saved block, and official duty area." />
       <ProfileHero
         initials={initialsFor(displayProfile.name)}
         label={`Verified ${roleLabel(displayProfile.role)}`}
@@ -500,13 +500,13 @@ export function ProfileView() {
           </div>
         ) : null}
       </AppCard>
-      <SectionLabel>Address & Block</SectionLabel>
+      <SectionLabel>{isOfficialRole(displayProfile.role) ? "Duty Area" : "Address & Block"}</SectionLabel>
       <AppCard>
         {!isEditingAddress && displayProfile.block ? (
           <div>
             {[
-              ["Area", blockPlaceLabel(profileBlockDetails || displayProfile.block)],
-              ["Saved address", displayProfile.address || "Not set"],
+              [isOfficialRole(displayProfile.role) ? "Assigned duty area" : "Area", blockPlaceLabel(profileBlockDetails || displayProfile.block)],
+              ...(!isOfficialRole(displayProfile.role) ? ([["Saved address", displayProfile.address || "Not set"]] as [string, string][]) : []),
               ["Block code", displayProfile.block.blockCode],
               [
                 "Citizens",
@@ -544,11 +544,11 @@ export function ProfileView() {
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <Button className="gap-2" onClick={() => setShowOfficialArea((current) => !current)} type="button" variant="secondary">
                   <MapPinned aria-hidden className="h-4 w-4" />
-                  {showOfficialArea ? "Hide my area" : "See my area"}
+                  {showOfficialArea ? "Hide duty area" : "See my duty area"}
                 </Button>
                 <Button className="gap-2" onClick={() => void startOfficialAreaChange()} type="button" variant="secondary">
                   <LocateFixed aria-hidden className="h-4 w-4" />
-                  Change my area
+                  Change duty area
                 </Button>
               </div>
             ) : null}
@@ -561,14 +561,14 @@ export function ProfileView() {
             {isChangingOfficialArea ? (
               <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
                 <label className="grid gap-2 text-sm font-bold text-slate-900">
-                  Select official area
+                  Select duty area
                   <select
                     className="h-11 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-teal-700 focus:ring-2 focus:ring-teal-100"
                     disabled={isLoadingBlocks}
                     onChange={(event) => setSelectedOfficialBlockCode(event.target.value)}
                     value={selectedOfficialBlockCode}
                   >
-                    <option value="">{isLoadingBlocks ? "Loading blocks..." : "Choose a block"}</option>
+                    <option value="">{isLoadingBlocks ? "Loading blocks..." : "Choose a duty block"}</option>
                     {availableBlocks.map((block) => (
                       <option key={block.blockCode} value={block.blockCode}>
                         {blockPlaceLabel(block)} / {block.blockCode}
