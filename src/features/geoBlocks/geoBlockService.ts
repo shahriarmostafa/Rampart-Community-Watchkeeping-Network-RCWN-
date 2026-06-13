@@ -5,6 +5,11 @@ export type DetectGeoBlockPayload = {
   lat: number;
   lng: number;
   areaName: string;
+  displayAddress?: string;
+  placeName?: string;
+  neighbourhood?: string;
+  city?: string;
+  postcode?: string;
   precision: number;
   type: GeoBlockType;
   division?: string;
@@ -33,8 +38,18 @@ export async function listGeoBlocks() {
   return response.data.blocks;
 }
 
+export async function getGeoBlock(blockCode: string) {
+  const response = await publicApi.get<{ block: GeoBlock }>(`/geo-blocks/${encodeURIComponent(blockCode)}`);
+  return response.data.block;
+}
+
 export async function saveGeoBlock(payload: DetectGeoBlockPayload & { blockCode?: string; center?: { lat: number; lng: number } }) {
   const response = await publicApi.post<{ block: GeoBlock }>("/geo-blocks", payload);
+  return response.data.block;
+}
+
+export async function updateGeoBlock(blockCode: string, payload: DetectGeoBlockPayload & { center?: { lat: number; lng: number } }) {
+  const response = await publicApi.patch<{ block: GeoBlock }>(`/geo-blocks/${encodeURIComponent(blockCode)}`, payload);
   return response.data.block;
 }
 

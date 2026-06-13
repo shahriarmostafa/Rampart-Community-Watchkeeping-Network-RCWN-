@@ -5,6 +5,11 @@ export type GeoBlock = {
   blockCode: string;
   precision: number;
   areaName: string;
+  displayAddress?: string;
+  placeName?: string;
+  neighbourhood?: string;
+  city?: string;
+  postcode?: string;
   division?: string;
   district?: string;
   upazila?: string;

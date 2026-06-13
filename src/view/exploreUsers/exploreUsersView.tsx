@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { AppCard } from "@/components/common/appCard";
-import { AppChip } from "@/components/common/appChip";
+import { RoleBadge } from "@/components/common/roleBadge";
 import { selectedRoleStorageKey } from "@/hooks/useSelectedRole";
 import type { Role } from "@/config/roles";
 
@@ -42,9 +42,7 @@ export function ExploreUsersView() {
               >
                 <div className="text-lg font-bold text-slate-950">{user.name}</div>
                 <p className="mt-2 text-sm text-slate-500">Preview allowed pages and capabilities.</p>
-                <AppChip className="mt-4" tone={user.role === "guardian" ? "purple" : "navy"}>
-                  {user.label}
-                </AppChip>
+                <RoleBadge className="mt-4" role={user.role} />
               </AppCard>
             </Link>
           ))}

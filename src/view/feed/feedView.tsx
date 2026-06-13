@@ -6,6 +6,7 @@ import { AppCard } from "@/components/common/appCard";
 import { AppChip } from "@/components/common/appChip";
 import { NoticeBanner } from "@/components/common/noticeBanner";
 import { PersonRow } from "@/components/common/personRow";
+import { RoleBadge } from "@/components/common/roleBadge";
 import { RouteHeader } from "@/components/common/routeHeader";
 import { useAuth } from "@/features/auth/useAuth";
 import { getBlockUpdates } from "@/features/blockUpdates/blockUpdateService";
@@ -58,7 +59,6 @@ function MissingCard({ report }: { report: Report }) {
 }
 
 function BlockUpdateCard({ update }: { update: BlockUpdate }) {
-  const roleLabel = update.authorRole === "guardian" ? "Guardian" : "Truth Keeper";
   const initials = (update.authorName ?? "TK")
     .split(" ")
     .filter(Boolean)
@@ -78,7 +78,12 @@ function BlockUpdateCard({ update }: { update: BlockUpdate }) {
       <div className="font-bold text-slate-950">{update.title}</div>
       <div className="mt-3">
         <PersonRow
-          detail={`${roleLabel} · ${update.blockCode}`}
+          detail={
+            <span className="flex flex-wrap items-center gap-1.5">
+              <RoleBadge role={update.authorRole} size="xs" />
+              <span>{update.blockCode}</span>
+            </span>
+          }
           initials={initials}
           name={update.authorName ?? "Truth Keeper"}
           toneIndex={2}

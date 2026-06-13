@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { RefreshCcw, Search, ShieldCheck } from "lucide-react";
+import { RoleBadge, roleLabel } from "@/components/common/roleBadge";
 import { AppHeader } from "@/components/layout/appHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,7 +66,7 @@ export function UserRolesAdminView() {
     try {
       const updated = await updateUserRole(user.firebaseUid, nextRole);
       setUsers((current) => current.map((item) => (item.firebaseUid === updated.firebaseUid ? updated : item)));
-      setMessage(`${updated.name} is now ${updated.role.replace("_", " ")}.`);
+      setMessage(`${updated.name} is now ${roleLabel(updated.role)}.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not update user role.");
     }
@@ -134,7 +135,8 @@ export function UserRolesAdminView() {
                     <p className="mt-1 text-xs text-slate-500">{user.email}</p>
                     <p className="mt-2 flex items-center gap-1 text-xs font-semibold text-slate-600">
                       <ShieldCheck aria-hidden className="h-3 w-3 text-teal-700" />
-                      Current role: {user.role.replace("_", " ")}
+                      Current role:
+                      <RoleBadge role={user.role} size="xs" />
                     </p>
                   </div>
                 </div>

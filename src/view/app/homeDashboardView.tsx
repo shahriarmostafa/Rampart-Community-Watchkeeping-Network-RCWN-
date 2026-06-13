@@ -2,6 +2,7 @@
 
 import { Bell, ClipboardList, FileText, MapPinned, SearchCheck, ShieldCheck, UserCircle } from "lucide-react";
 import { QuickActionGrid } from "@/components/common/quickActionGrid";
+import { RoleBadge, roleLabel } from "@/components/common/roleBadge";
 import { RouteHeader } from "@/components/common/routeHeader";
 import { SectionLabel } from "@/components/common/sectionLabel";
 import { useAuth } from "@/features/auth/useAuth";
@@ -21,7 +22,8 @@ export function HomeDashboardView() {
 
   return (
     <div className="grid gap-4">
-      <RouteHeader title="Home" subtitle={`Signed in as ${role.replace("_", " ")}.`} />
+      <RouteHeader title="Home" subtitle={`Signed in as ${roleLabel(role)}.`} />
+      <RoleBadge role={role} />
       <SectionLabel>Citizen tools</SectionLabel>
       <QuickActionGrid actions={citizenActions} />
       {(role === "watcher" || role === "truth_keeper" || role === "guardian") ? (

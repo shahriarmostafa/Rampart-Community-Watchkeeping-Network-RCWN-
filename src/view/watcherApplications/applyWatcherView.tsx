@@ -21,6 +21,16 @@ function firstError(errors: unknown[]) {
 }
 
 function blockPlaceLabel(block: GeoBlock) {
+  const friendly = [block.placeName, block.neighbourhood, block.city].filter(Boolean).join(", ");
+
+  if (friendly) {
+    return friendly;
+  }
+
+  if (block.displayAddress) {
+    return block.displayAddress;
+  }
+
   return [block.areaName, block.ward ? `Ward ${block.ward}` : null, block.upazila, block.district]
     .filter(Boolean)
     .join(", ");

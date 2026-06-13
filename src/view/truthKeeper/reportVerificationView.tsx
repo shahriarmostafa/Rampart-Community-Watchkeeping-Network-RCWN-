@@ -104,7 +104,7 @@ export function ReportVerificationView({ id }: { id: string }) {
     return (
       <div className="grid gap-4 py-8 text-center">
         <p className="text-sm font-semibold text-red-600">{loadError ?? "Report not found."}</p>
-        <Button onClick={() => router.back()} variant="outline">Go back</Button>
+        <Button onClick={() => router.back()} variant="secondary">Go back</Button>
       </div>
     );
   }

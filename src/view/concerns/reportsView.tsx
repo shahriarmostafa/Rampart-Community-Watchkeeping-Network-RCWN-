@@ -44,10 +44,11 @@ export function ReportsView() {
 
     let isMounted = true;
 
+    const uid = user.uid;
     async function loadReports() {
       setLoading(true);
       try {
-        const reports = await getMyReports(user.uid);
+        const reports = await getMyReports(uid);
         if (isMounted) {
           setMyReports(reports);
         }

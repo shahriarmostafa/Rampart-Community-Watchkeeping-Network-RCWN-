@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Plus, ShieldCheck, UsersRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AppCard } from "@/components/common/appCard";
-import { AppChip } from "@/components/common/appChip";
 import { NoticeBanner } from "@/components/common/noticeBanner";
+import { RoleBadge } from "@/components/common/roleBadge";
 import { RouteHeader } from "@/components/common/routeHeader";
 import { SectionLabel } from "@/components/common/sectionLabel";
 import { Button } from "@/components/ui/button";
@@ -106,9 +106,7 @@ export function CircleView() {
                           <h2 className="text-sm font-bold text-slate-950">{member.memberName}</h2>
                           <p className="mt-1 text-xs text-slate-500">{member.memberEmail}</p>
                         </div>
-                        <AppChip tone={member.memberRole === "guardian" ? "purple" : member.memberRole === "watcher" ? "teal" : "navy"}>
-                          {member.memberRole.replace("_", " ")}
-                        </AppChip>
+                        <RoleBadge role={member.memberRole} />
                       </div>
                       <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-slate-600">
                         <ShieldCheck aria-hidden className="h-4 w-4 text-teal-700" />
@@ -145,9 +143,7 @@ export function CircleView() {
                         <h2 className="text-sm font-bold text-slate-950">{member.name}</h2>
                         <p className="mt-1 text-xs text-slate-500">{member.email}</p>
                       </div>
-                      <AppChip tone={member.role === "guardian" ? "purple" : member.role === "watcher" ? "teal" : "navy"}>
-                        {member.role.replace("_", " ")}
-                      </AppChip>
+                      <RoleBadge role={member.role} />
                     </div>
                     <p className="mt-3 text-xs font-semibold text-slate-600">
                       Block {member.block?.blockCode || "not set"}

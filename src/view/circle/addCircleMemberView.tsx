@@ -3,7 +3,7 @@
 import { Search, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { AppCard } from "@/components/common/appCard";
-import { AppChip } from "@/components/common/appChip";
+import { RoleBadge } from "@/components/common/roleBadge";
 import { RouteHeader } from "@/components/common/routeHeader";
 import { SectionLabel } from "@/components/common/sectionLabel";
 import { Button } from "@/components/ui/button";
@@ -141,9 +141,7 @@ export function AddCircleMemberView() {
                     <h2 className="text-sm font-bold text-slate-950">{member.name}</h2>
                     <p className="mt-1 text-xs text-slate-500">{member.email}</p>
                   </div>
-                  <AppChip tone={member.role === "guardian" ? "purple" : member.role === "watcher" ? "teal" : "navy"}>
-                    {member.role.replace("_", " ")}
-                  </AppChip>
+                  <RoleBadge role={member.role} />
                 </div>
                 <Button className="mt-3 h-10 w-full gap-2" onClick={() => void handleAdd(member)} type="button" variant="secondary">
                   <UserPlus aria-hidden className="h-4 w-4" />

@@ -5,21 +5,31 @@ export function ProfileHero({
   name,
   label,
   detail,
+  photoUrl,
   tone = "teal",
 }: {
   initials: string;
   name: string;
   label: string;
   detail: string;
+  photoUrl?: string;
   tone?: "teal" | "purple";
 }) {
   const bg = tone === "teal" ? "bg-teal-700" : "bg-violet-950";
 
   return (
     <section className={`${bg} rounded-lg p-5 text-center text-white shadow-sm`}>
-      <div className="mx-auto grid h-20 w-20 place-items-center rounded-lg bg-white/15 text-2xl font-bold ring-4 ring-white/25">
-        {initials}
-      </div>
+      {photoUrl ? (
+        <img
+          alt={`${name} profile photo`}
+          className="mx-auto h-20 w-20 rounded-lg object-cover ring-4 ring-white/25"
+          src={photoUrl}
+        />
+      ) : (
+        <div className="mx-auto grid h-20 w-20 place-items-center rounded-lg bg-white/15 text-2xl font-bold ring-4 ring-white/25">
+          {initials}
+        </div>
+      )}
       <div className="mt-3">
         <AppChip tone={tone === "teal" ? "teal" : "gold"} className="bg-white/90">
           {label}

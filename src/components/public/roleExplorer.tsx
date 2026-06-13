@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { RoleBadge } from "@/components/common/roleBadge";
 import type { Role } from "@/config/roles";
 import { selectedRoleStorageKey } from "@/hooks/useSelectedRole";
 
@@ -22,9 +23,7 @@ export function RoleExplorer() {
           >
             <div className="text-lg font-bold text-slate-950">{user.name}</div>
             <p className="mt-2 text-sm text-slate-500">Explore the app as a {user.label.toLowerCase()}.</p>
-            <span className="mt-4 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-800">
-              {user.label}
-            </span>
+            <RoleBadge className="mt-4" role={user.role} />
           </div>
         </Link>
       ))}

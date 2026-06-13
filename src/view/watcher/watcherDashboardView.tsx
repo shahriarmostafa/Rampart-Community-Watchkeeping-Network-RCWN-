@@ -140,7 +140,7 @@ function SessionCard({ session }: { session: SafeWalkSessionPublic }) {
             className={`w-full gap-2 ${isDanger ? "bg-rose-700 hover:bg-rose-800" : ""}`}
             onClick={() => setExpanded((v) => !v)}
             type="button"
-            variant={isDanger ? "default" : "secondary"}
+            variant={isDanger ? "primary" : "secondary"}
           >
             {isDanger ? (
               <ShieldAlert aria-hidden className="h-4 w-4" />
@@ -159,6 +159,7 @@ export function WatcherDashboardView() {
   const { user } = useAuth();
   const [sessions, setSessions] = useState<SafeWalkSessionPublic[]>([]);
   const [blockCode, setBlockCode] = useState<string | null>(null);
+  const [isOnDuty, setIsOnDuty] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
@@ -168,11 +169,12 @@ export function WatcherDashboardView() {
     if (!user) return;
     void getUserProfile(user.uid).then((profile) => {
       setBlockCode(profile.block?.blockCode ?? null);
+      setIsOnDuty((profile.dutyStatus ?? "on_duty") === "on_duty");
     });
   }, [user]);
 
   async function loadSessions(silent = false) {
-    if (!blockCode) return;
+    if (!blockCode || !isOnDuty) return;
     if (!silent) setLoading(true);
     setError(null);
     try {
@@ -193,7 +195,7 @@ export function WatcherDashboardView() {
     const interval = setInterval(() => void loadSessions(true), 15_000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blockCode]);
+  }, [blockCode, isOnDuty]);
 
   const hasSessions = sessions.length > 0;
   const dangerSessions = sessions.filter((s) => s.riskLevel === "danger");
@@ -218,7 +220,15 @@ export function WatcherDashboardView() {
         </AppCard>
       )}
 
-      {blockCode && (
+      {blockCode && !isOnDuty && (
+        <AppCard className="border-amber-200 bg-amber-50">
+          <p className="text-sm font-semibold text-amber-800">
+            You are off duty. Turn on duty status from Profile to watch nearby Safe Walk requests.
+          </p>
+        </AppCard>
+      )}
+
+      {blockCode && isOnDuty && (
         <>
           <div className="flex items-center justify-between">
             <SectionLabel>

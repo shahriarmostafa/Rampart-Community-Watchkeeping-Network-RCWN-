@@ -61,7 +61,7 @@ export function ConcernDetailView({ id }: { id: string }) {
     return (
       <div className="grid gap-4 py-8 text-center">
         <p className="text-sm font-semibold text-red-600">{error ?? "Report not found."}</p>
-        <Button onClick={() => router.back()} variant="outline">Go back</Button>
+        <Button onClick={() => router.back()} variant="secondary">Go back</Button>
       </div>
     );
   }
@@ -160,7 +160,7 @@ export function ConcernDetailView({ id }: { id: string }) {
       </AppCard>
 
       {report.status === "verified_true" && report.type !== "missing" && (
-        <Button className="gap-2" variant="outline" type="button" onClick={() => alert("Escalation coming soon.")}>
+        <Button className="gap-2" variant="secondary" type="button" onClick={() => alert("Escalation coming soon.")}>
           <TrendingUp aria-hidden className="h-4 w-4" />
           Escalate
         </Button>

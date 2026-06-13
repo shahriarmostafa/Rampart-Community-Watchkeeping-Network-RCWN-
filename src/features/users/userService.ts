@@ -7,6 +7,7 @@ export type UpdateUserProfilePayload = {
   firebaseUid: string;
   name: string;
   email: string;
+  dutyStatus?: AppUser["dutyStatus"];
   photoUrl?: string;
   address?: string;
   location?: AppUser["location"];
@@ -57,4 +58,8 @@ export async function searchUsers(payload: { email?: string; role?: Role }) {
 export async function updateUserRole(firebaseUid: string, role: Role) {
   const response = await secureApi.patch<{ user: AppUser }>(`/users/${firebaseUid}/role`, { role });
   return response.data.user;
+}
+
+export async function saveFcmToken(firebaseUid: string, fcmToken: string) {
+  await secureApi.patch(`/users/${firebaseUid}/fcm-token`, { fcmToken });
 }

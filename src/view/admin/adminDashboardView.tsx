@@ -16,6 +16,12 @@ const adminAreas = [
     icon: MapPinned,
   },
   {
+    title: "Manage blocks",
+    description: "View saved blocks on a map and edit their boundaries or address labels.",
+    href: "/admin/geo-blocks",
+    icon: MapPinned,
+  },
+  {
     title: "User roles",
     description: "Set any user's access as citizen, watcher, truth keeper, or guardian.",
     href: "/admin/user-roles",
