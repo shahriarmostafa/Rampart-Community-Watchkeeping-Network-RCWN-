@@ -354,8 +354,6 @@ function GeoBlockEditorView({ blockCode, mode }: { blockCode?: string; mode: "cr
         neighbourhood: address.neighbourhood || address.suburb || address.quarter || current.neighbourhood,
         city: address.city || address.town || address.municipality || current.city,
         postcode: address.postcode || current.postcode,
-        division: address.state || current.division,
-        district: address.county || address.city_district || current.district,
         areaName: data.name || address.neighbourhood || address.suburb || current.areaName,
       }));
       setDetectedBlock(null);
@@ -492,12 +490,6 @@ function GeoBlockEditorView({ blockCode, mode }: { blockCode?: string; mode: "cr
                 <div className="grid grid-cols-2 gap-3">
                   <Input onChange={(event) => updateArea("widthKm", valueAsNumber(event.target.value))} placeholder="Width km" type="number" value={payload.area.widthKm} />
                   <Input onChange={(event) => updateArea("heightKm", valueAsNumber(event.target.value))} placeholder="Height km" type="number" value={payload.area.heightKm} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <Input onChange={(event) => updateField("division", event.target.value)} placeholder="Division/state" value={payload.division} />
-                  <Input onChange={(event) => updateField("district", event.target.value)} placeholder="District" value={payload.district} />
-                  <Input onChange={(event) => updateField("upazila", event.target.value)} placeholder="Upazila" value={payload.upazila} />
-                  <Input onChange={(event) => updateField("ward", event.target.value)} placeholder="Ward" value={payload.ward} />
                 </div>
               </div>
             </div>

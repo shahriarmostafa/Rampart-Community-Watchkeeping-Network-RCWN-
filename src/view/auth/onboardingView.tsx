@@ -49,26 +49,28 @@ export function OnboardingView() {
   useEffect(() => {
     if (!coordinates || step !== "location" || resolving || block) return;
 
-    setResolving(true);
-    setStatusMsg(null);
-    setNotAvailable(false);
+    window.setTimeout(() => {
+      setResolving(true);
+      setStatusMsg(null);
+      setNotAvailable(false);
 
-    void resolveGeoBlockLocation({ lat: coordinates.latitude, lng: coordinates.longitude })
-      .then((result) => {
-        if (result.status === "matched") {
-          setBlock(result.block);
-          setMultipleBlocks([]);
-        } else if (result.status === "multiple_matches") {
-          setMultipleBlocks(result.blocks);
-          setSelectedCode(result.blocks[0]?.blockCode ?? "");
-          setStatusMsg("Your location sits on the border of two blocks. Choose the one that matches your address best.");
-        } else {
-          setNotAvailable(true);
-          setStatusMsg("RCWN is not available in your area yet. You can still use the app and set your block later from Profile.");
-        }
-      })
-      .catch(() => setStatusMsg("Could not detect your location. Please try again."))
-      .finally(() => setResolving(false));
+      void resolveGeoBlockLocation({ lat: coordinates.latitude, lng: coordinates.longitude })
+        .then((result) => {
+          if (result.status === "matched") {
+            setBlock(result.block);
+            setMultipleBlocks([]);
+          } else if (result.status === "multiple_matches") {
+            setMultipleBlocks(result.blocks);
+            setSelectedCode(result.blocks[0]?.blockCode ?? "");
+            setStatusMsg("Your location sits on the border of two blocks. Choose the one that matches your address best.");
+          } else {
+            setNotAvailable(true);
+            setStatusMsg("RCWN is not available in your area yet. You can still use the app and set your block later from Profile.");
+          }
+        })
+        .catch(() => setStatusMsg("Could not detect your location. Please try again."))
+        .finally(() => setResolving(false));
+    }, 0);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coordinates, step]);
 
@@ -293,7 +295,7 @@ export function OnboardingView() {
               <CheckCircle2 aria-hidden className="h-10 w-10" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-950">You're all set!</h1>
+              <h1 className="text-2xl font-bold text-slate-950">You&apos;re all set!</h1>
               <p className="mt-2 text-sm leading-6 text-slate-500">
                 Your block is saved. Watchers and truth keepers in your area are now linked to your account.
               </p>

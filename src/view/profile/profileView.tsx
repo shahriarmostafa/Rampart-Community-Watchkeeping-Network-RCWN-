@@ -505,12 +505,9 @@ export function ProfileView() {
         {!isEditingAddress && displayProfile.block ? (
           <div>
             {[
-              ["Address", displayProfile.address || blockPlaceLabel(profileBlockDetails || displayProfile.block)],
-              ["Place", blockPlaceLabel(profileBlockDetails || displayProfile.block)],
-              ["Map address", profileBlockDetails?.displayAddress || "Not set"],
-              ["City", profileBlockDetails ? [profileBlockDetails.city, profileBlockDetails.postcode].filter(Boolean).join(" ") || "Not set" : "Not set"],
+              ["Area", blockPlaceLabel(profileBlockDetails || displayProfile.block)],
+              ["Saved address", displayProfile.address || "Not set"],
               ["Block code", displayProfile.block.blockCode],
-              ["Admin area", profileBlockDetails ? [profileBlockDetails.district, profileBlockDetails.division].filter(Boolean).join(", ") || "Not set" : "Not set"],
               [
                 "Citizens",
                 profileBlockDetails
